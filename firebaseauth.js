@@ -7,27 +7,39 @@
   import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword} from "https://www.gstatic.com/firebasejs/11.9.1/firebase-auth.js"
   import { getFirestore, setDoc, doc} from "https://www.gstatic.com/firebasejs/11.9.1/firebase-firestore.js";
 
+
   const firebaseConfig = {
-    apiKey: "AIzaSyCXVjAYiRhVD4y9VXMM4GYW4KdibSPMF04",
-    authDomain: "login-form-82f3e.firebaseapp.com",
-    projectId: "login-form-82f3e",
-    storageBucket: "login-form-82f3e.firebasestorage.app",
-    messagingSenderId: "36213474692",
-    appId: "1:36213474692:web:647189de752dabe13049d1"
-  };
+  apiKey: process.env.FIREBASE_API_KEY,
+  authDomain: process.env.FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.FIREBASE_PROJECT_ID,
+  storageBucket: process.env.FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.FIREBASE_APP_ID
+};
 
-  // Initialize Firebase
-  const app = initializeApp(firebaseConfig);
+export default firebaseConfig;
 
-  function showMessage(message, divId) {
-    var messsageDiv=document.getElementById(divId);
-    messsageDiv.style.display="block";
-    messsageDiv.innerHTML=message;
-    messsageDiv.style.opacity=1;
-    setTimeout(function(){
-      messsageDiv.style.opacity=0;
-    },5000);
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+
+function showMessage(message, divId) {
+  const messageDiv = document.getElementById(divId);
+
+  if (!messageDiv) {
+    console.warn(`Element with ID "${divId}" not found.`);
+    return; // Exit the function if the element doesn't exist
   }
+
+  messageDiv.style.display = "block";
+  messageDiv.innerHTML = message;
+  messageDiv.style.opacity = 1;
+
+  setTimeout(() => {
+    messageDiv.style.opacity = 0;
+  }, 5000);
+}
+
 
   const signUp=document.getElementById('submitSignUp');
   signUp.addEventListener('click', (event) => {
