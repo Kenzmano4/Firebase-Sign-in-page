@@ -14,43 +14,56 @@ const firebaseConfig = {
   // Initialize Firebase
   const app = initializeApp(firebaseConfig);
 
-  const auth=getAuth();
-  const db=getFirestore();
+  import { getAuth, onAuthStateChanged, signOut } from "firebase/auth";
+import { getFirestore, doc, getDoc } from "firebase/firestore";
 
-  onAuthStateChanged(auth, (user)=>{
-    const loggedInUserId=localStorage.getItem('loggedInUserId');
-    if(loggedInUserId){
-        const docRef = doc(db, "users",loggedInUserId);
-        getDoc(docRef)
-        .then((docSnap)=>{
-            if(docSnap.exists()){
-                const userData=docSnap.data();
-                document.getElementById('loggedUserFName').innerText=userData.firstName;
-                document.getElementById('loggedUserEmail').innerText=userData.email;
-                document.getElementById('loggedUserLName').innerText=userData.lastName;
-            }
-            else{
-                console.log("no document found matching id")
-            }
-        })
-        .catch((error)=>{
-            console.log("Error getting document");
-        })
-    }
-    else{
-        console.log("User Id not found in Local storage")
-    }
-  })
-  const logoutButton=document.getElementById('logout');
+const auth = getAuth();
+const db = getFirestore();
 
-  logoutButton.addEventListener('click',()=>{
-    localStorage.removeItem('loggedInUserId');
+// Track user session
+onAuthStateChanged(auth, async (user) => {
+  if (user) {
+    const userId = user.uid; // ✅ Use Firebase Auth's user ID directly
+
+    try {
+      const docRef = doc(db, "users", userId);
+      const docSnap = await getDoc(docRef);
+
+      if (docSnap.exists()) {
+        const userData = docSnap.data();
+
+        const firstNameEl = document.getElementById("loggedUserFName");
+        const emailEl = document.getElementById("loggedUserEmail");
+        const lastNameEl = document.getElementById("loggedUserLName");
+
+        if (firstNameEl) firstNameEl.innerText = userData.firstName;
+        if (emailEl) emailEl.innerText = userData.email;
+        if (lastNameEl) lastNameEl.innerText = userData.lastName;
+      } else {
+        console.log("No document found for this user.");
+      }
+    } catch (error) {
+      console.error("Error getting document:", error);
+    }
+
+  } else {
+    console.log("No user is currently signed in.");
+    // Optionally redirect to login page
+    // window.location.href = "login.html";
+  }
+});
+
+// Logout logic
+const logoutButton = document.getElementById("logout");
+
+if (logoutButton) {
+  logoutButton.addEventListener("click", () => {
     signOut(auth)
-    .then(()=>{
-        window.location.href='index.html';
-    })
-    .catch((error)=>{
-        console.error('Error Signing out:',error);
-    }
-)
-  })
+      .then(() => {
+        window.location.href = "index.html";
+      })
+      .catch((error) => {
+        console.error("Error signing out:", error);
+      });
+  });
+}
